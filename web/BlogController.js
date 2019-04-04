@@ -78,6 +78,7 @@ function editBlog(request,response){
             response.writeHead(200);
             response.write(respUtil.writeResult("success","添加成功",null))
             response.end()
+            console.log(result);
             var blogId = result.insertId;
             var tagList = tags.split(",");
             for(var i = 0 ; i < tagList.length ; i ++){
@@ -93,7 +94,6 @@ function editBlog(request,response){
 path.set("/editBlog",editBlog)
 
 function queryTag(tag,blogId){
-    console.log(123)
     tagsDao.queryTag(tag,function(result){
         if(result == null || result.length == 0){
             insertTag(tag,blogId);
@@ -103,7 +103,7 @@ function queryTag(tag,blogId){
     })
 }
 
-function insertTag(tag,blogId){
+function insertTag(tag,blogId){1
 
     tagsDao.insertTag(tag,timeUtil.getNow(),timeUtil.getNow(),function(result){
         insertTagBlogMapping(result.insertId,blogId,timeUtil.getNow(),timeUtil.getNow(),function(){});

@@ -159,7 +159,7 @@ var articleList = new Vue({
         generatePageTool:function(){
             var nowPage = this.page;
             var pageSize = this.pageSize
-            var totalCount = this.count;
+            var totalCount =100 ;
             var result = [];
             result.push({text:"<<",page:1});
             if(nowPage > 2){
@@ -180,9 +180,6 @@ var articleList = new Vue({
             this.pageNumList = result;
             return result
         }
-    },
-    methods:{
-
     },
     created:function(){
         this.getPages(this.page,this.pageSize)
