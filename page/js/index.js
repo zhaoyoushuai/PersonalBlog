@@ -1,3 +1,5 @@
+
+
 var everyDay = new Vue({
     el:"#every_day",
     data:{
@@ -77,8 +79,8 @@ var articleList = new Vue({
         getPages:function(){
             return function(page,pageSize){
                 var tag = '';
+                var input = '';
                 var search = location.search.indexOf("?") !== -1 ?location.search.split("?")[1].split("&"):"";
-
                 for( var i = 0 ; i < search.length ; i ++){
                     if(search[i].split("=")[0] == 'tag'){
                         try{
@@ -86,9 +88,15 @@ var articleList = new Vue({
                         }catch(e){
                             console.log(e);
                         }
+                    }else if(search[i].split("=")[0] == 'search'){
+                        try{
+                            input = parseInt(search[i].split("=")[1])
+                        }catch(e){
+                            console.log(e);
+                        }
                     }
                 }
-                if(tag == ""){
+                if(tag == "" && input == ""){
                     axios({
                         method:"get",
                         url:"/queryBlogByPage?page="+(page - 1)+"&pageSize="+pageSize
@@ -119,12 +127,11 @@ var articleList = new Vue({
                         articleList.count = resp.data.data[0].count;
                         articleList.generatePageTool
                     })
-                }else{
+                }else if(tag != "" && input == ""){
                     axios({
                         method:"get",
                         url:"/queryByTag?page="+(page - 1)+"&pageSize="+pageSize +"&tag="+tag
                     }).then(function(resp){
-                        console.log(resp)
                         var result = resp.data.data;
                         var list = [];
                         for(var i = 0 ; i < result.length; i ++){
@@ -148,10 +155,41 @@ var articleList = new Vue({
                         method:"get",
                         url:"/queryByTagCount?tagId=" + tag
                     }).then(function(resp){
-                        console.log(resp);
                         articleList.count = resp.data.data[0].count;
                         articleList.generatePageTool
                     })
+                }else if(input != "" && tag == ""){
+                    axios({
+                        method:"get",
+                        url:"/queryBlogByPage?page=0&pageSize=10000"
+                    }).then(function(resp){
+                        console.log(resp)
+                        var result = resp.data.data;
+                        var list = [];
+                        for(var i = 0 ; i < result.length; i ++){
+                            console.log(result[i].title,input,result[i].title.indexOf(input))
+                            if(result[i].title.indexOf(input) != -1){
+                                console.log("===========")
+                                var temp = {};
+                                temp.title = result[i].title;
+                                temp.content = result[i].content;
+                                var tempData = new Date(parseInt(result[i].ctime) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ');
+                                temp.data =tempData;
+                                temp.views = result[i].views;
+                                temp.tags = result[i].tags;
+                                temp.id = result[i].id;
+                                temp.link ="/blog_detail.html?bid="+ result[i].id;
+                                list.push(temp);
+                                articleList.page = page
+                                articleList.articleList = list
+                            }
+                        }
+                        articleList.count = articleList.articleList.length;
+                        console.log(articleList.count)
+                        articleList.generatePageTool
+                    }).catch(function(err){
+                        console.log("请求错误")
+                    });
                 }
 
             }
@@ -159,7 +197,7 @@ var articleList = new Vue({
         generatePageTool:function(){
             var nowPage = this.page;
             var pageSize = this.pageSize
-            var totalCount =100 ;
+            var totalCount =this.count ;
             var result = [];
             result.push({text:"<<",page:1});
             if(nowPage > 2){
@@ -176,7 +214,7 @@ var articleList = new Vue({
                 result.push({text:nowPage + 2,page:nowPage + 2});
             }
             // result.push({text:">>",page:parseInt((totalCount + pageSize - 1)/pageSize)});
-            result.push({text:">>",page:totalCount/pageSize});
+            result.push({text:">>",page:Math.ceil(totalCount/pageSize)});
             this.pageNumList = result;
             return result
         }
