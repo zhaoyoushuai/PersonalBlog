@@ -16,7 +16,7 @@ body{
     text-align: center;
 }
 .header{
-    width: 100%;
+    min-width: 1200px;
     height: 50px;
     background: #191918;
 }
@@ -25,6 +25,7 @@ body{
     width: 1170px;
     height: 50px;
     margin: 0 auto;
+    background: #191918;
 }
 
 .title{
